@@ -1,5 +1,5 @@
-import request from './request'
-import type { ApiResponse } from './request'
+import request from '../utils/request'
+import type { ApiResponse } from '../utils/request'
 
 export type Gender = 'MALE' | 'FEMALE'
 export type MemberStatus = 'ALIVE' | 'DECEASED'

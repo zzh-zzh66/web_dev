@@ -111,7 +111,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { memberApi, type Member } from '@/api/member'
-import { User, CircleCheck, CircleClose, Star, Plus, Tree, List } from '@element-plus/icons-vue'
+import { User, CircleCheck, CircleClose, Star, Plus, Grid, List } from '@element-plus/icons-vue'
 
 const stats = ref({
   memberCount: 0,

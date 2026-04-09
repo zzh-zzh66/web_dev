@@ -38,7 +38,7 @@
             <span>成员管理</span>
           </el-menu-item>
           <el-menu-item index="/genealogy">
-            <el-icon><Tree /></el-icon>
+            <el-icon><Grid /></el-icon>
             <span>族谱展示</span>
           </el-menu-item>
         </el-menu>
