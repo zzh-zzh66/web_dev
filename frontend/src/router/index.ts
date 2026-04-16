@@ -49,6 +49,16 @@ const routes: RouteRecordRaw[] = [
         path: 'genealogy',
         name: 'Genealogy',
         component: () => import('@/views/genealogy/GenealogyTreeView.vue')
+      },
+      {
+        path: 'profile/:memberId',
+        name: 'Profile',
+        component: () => import('@/views/profile/ProfileView.vue')
+      },
+      {
+        path: 'messages',
+        name: 'Messages',
+        component: () => import('@/views/profile/MessagesView.vue')
       }
     ]
   }
