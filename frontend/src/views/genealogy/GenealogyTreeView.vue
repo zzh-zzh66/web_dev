@@ -2,6 +2,11 @@
   <div class="genealogy-tree-view">
     <!-- 左侧边栏 -->
     <aside class="left-sidebar" :class="{ 'is-collapsed': isSidebarCollapsed }">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">家族成员</h2>
+        <p class="sidebar-subtitle">{{ totalMemberCount }} 位成员</p>
+      </div>
+
       <div class="sidebar-content">
         <!-- 搜索栏 -->
         <div class="sidebar-section search-section">
@@ -25,129 +30,138 @@
 
         <!-- 辈分导航 -->
         <div class="sidebar-section generation-nav">
-          <div class="section-title">辈分导航</div>
+          <div class="section-title">
+            <span>辈分导航</span>
+            <span class="section-count">{{ generationStats.length }} 代</span>
+          </div>
           <div class="generation-list">
             <div
               v-for="gen in generationStats"
               :key="gen.generation"
-              class="generation-item"
+              class="generation-card"
               :class="{ 'is-active': activeGeneration === gen.generation }"
               @click="handleGenerationClick(gen.generation)"
             >
-              <span class="gen-color" :style="{ backgroundColor: gen.color }"></span>
-              <span class="gen-label">第{{ gen.generation }}代</span>
-              <span class="gen-count">{{ gen.count }}人</span>
+              <span class="gen-color" :style="{ background: gen.color }"></span>
+              <span class="gen-label">第 {{ gen.generation }} 代</span>
+              <span class="gen-count">{{ gen.count }} 人</span>
             </div>
           </div>
         </div>
+    </div>
 
-        <!-- 小地图 -->
-        <div class="sidebar-section mini-map-section">
-          <MiniMap
-            :tree-data="treeData"
-            :current-member-id="selectedMemberId ?? undefined"
-            :current-member-name="selectedMember?.name"
-            :current-generation="selectedMember?.generation"
-            @jump="handleMapJump"
-          />
-        </div>
-      </div>
-
-      <!-- 侧边栏折叠按钮 -->
+    <!-- 侧边栏折叠按钮 -->
       <button class="sidebar-toggle" @click="toggleSidebar">
-        <el-icon :size="16">
+        <el-icon :size="14">
           <ArrowLeft v-if="!isSidebarCollapsed" />
           <ArrowRight v-else />
         </el-icon>
       </button>
     </aside>
 
-    <!-- 主画布区域 -->
-    <main class="main-canvas" ref="canvasRef">
-      <!-- 画布容器 -->
-      <div
-        class="canvas-container"
-        :style="canvasStyle"
-        @mousedown="handleCanvasMouseDown"
-        @mousemove="handleCanvasMouseMove"
-        @mouseup="handleCanvasMouseUp"
-        @mouseleave="handleCanvasMouseUp"
-        @wheel="handleCanvasWheel"
-        @dblclick="handleCanvasDoubleClick"
-      >
+    <!-- 主画布区域 - 固定视口 -->
+    <main
+      class="main-canvas"
+      ref="canvasRef"
+      @mousedown="handleCanvasMouseDown"
+      @mousemove="handleCanvasMouseMove"
+      @mouseup="handleCanvasMouseUp"
+      @mouseleave="handleCanvasMouseUp"
+      @wheel="handleCanvasWheel"
+      @dblclick="handleCanvasDoubleClick"
+    >
+      <!-- 族谱内容层 - 可缩放拖动 -->
+      <div class="canvas-content" :style="canvasContentStyle">
         <!-- 加载状态 -->
         <div v-if="loading" class="canvas-loading">
-          <el-skeleton :rows="8" animated />
+          <div class="loading-spinner">
+            <el-icon class="is-loading"><Loading /></el-icon>
+          </div>
+          <p>正在加载家族数据...</p>
         </div>
 
         <!-- 族谱树 -->
         <div v-else-if="treeData" class="tree-wrapper">
           <GenealogyNodeComponent
-          :node="treeData"
-          :selected-id="selectedMemberId"
-          :highlighted-ids="highlightedIds"
-          :filtered-ids="filteredIds"
-          :collapsed-ids="collapsedIds"
-          @node-click="handleNodeClick"
-          @node-dblclick="handleNodeDoubleClick"
-        />
+            :node="treeData"
+            :selected-id="selectedMemberId"
+            :highlighted-ids="Array.from(highlightedIds)"
+            :filtered-ids="Array.from(filteredIds)"
+            :collapsed-ids="Array.from(collapsedIds)"
+            @node-click="handleNodeClick"
+            @node-dblclick="handleNodeDoubleClick"
+          />
         </div>
 
         <!-- 空状态 -->
         <div v-else class="canvas-empty">
-          <el-empty description="暂无族谱数据">
-            <el-button type="primary">添加成员</el-button>
-          </el-empty>
+          <div class="empty-illustration">
+            <el-icon :size="64"><DataLine /></el-icon>
+          </div>
+          <h3>暂无族谱数据</h3>
+          <p>开始添加家族成员，构建您的族谱树</p>
+          <el-button type="primary" class="empty-btn">添加成员</el-button>
         </div>
       </div>
 
       <!-- 缩放控制条 -->
       <div class="canvas-controls">
         <div class="zoom-controls">
-          <el-button-group>
-            <el-button @click="handleZoomOut" :disabled="zoom <= minZoom">
-              <el-icon><Minus /></el-icon>
-            </el-button>
-            <el-button class="zoom-value" disabled>{{ Math.round(zoom * 100) }}%</el-button>
-            <el-button @click="handleZoomIn" :disabled="zoom >= maxZoom">
-              <el-icon><Plus /></el-icon>
-            </el-button>
-          </el-button-group>
-          <el-slider
-            v-model="zoom"
-            :min="minZoom"
-            :max="maxZoom"
-            :step="0.1"
-            class="zoom-slider"
-          />
-          <el-button @click="handleZoomReset">重置</el-button>
+          <button class="btn-icon" @click="handleZoomOut" :disabled="zoom <= minZoom">
+            <el-icon><Minus /></el-icon>
+          </button>
+          <div class="zoom-track">
+            <el-slider
+              v-model="zoom"
+              :min="minZoom"
+              :max="maxZoom"
+              :step="0.1"
+              class="zoom-slider"
+            />
+          </div>
+          <button class="btn-icon" @click="handleZoomIn" :disabled="zoom >= maxZoom">
+            <el-icon><Plus /></el-icon>
+          </button>
+          <span class="zoom-value">{{ Math.round(zoom * 100) }}%</span>
         </div>
 
+        <div class="control-divider"></div>
+
         <div class="view-controls">
-          <el-button @click="handleExpandAll">
+          <button class="btn-pill" @click="handleExpandAll">
+            <el-icon><Grid /></el-icon>
             {{ allExpanded ? '收起全部' : '展开全部' }}
-          </el-button>
-          <el-button @click="handleFullScreen">
+          </button>
+          <button class="btn-pill" @click="handleFullScreen">
             <el-icon><FullScreen /></el-icon>
-          </el-button>
-          <el-button @click="handleExport">
+          </button>
+          <button class="btn-pill" @click="handleExport">
             <el-icon><Download /></el-icon>
             导出
-          </el-button>
+          </button>
         </div>
       </div>
 
       <!-- 状态栏 -->
       <div class="canvas-status">
-        <span class="status-item">
-          共 {{ totalMemberCount }} 人
-        </span>
-        <span class="status-item" v-if="selectedMember">
-          当前: {{ selectedMember.name }}
-        </span>
-        <span class="status-item">
-          缩放: {{ Math.round(zoom * 100) }}%
-        </span>
+        <div class="status-left">
+          <span class="status-item">
+            <span class="status-dot"></span>
+            共 {{ totalMemberCount }} 人
+          </span>
+          <span class="status-item" v-if="selectedMember">
+            <span class="status-dot active"></span>
+            当前: {{ selectedMember.name }}
+          </span>
+        </div>
+        <div class="status-right">
+          <span class="status-item">
+            缩放 {{ Math.round(zoom * 100) }}%
+          </span>
+          <span class="status-item" v-if="filteredMemberCount !== totalMemberCount">
+            已筛选 {{ filteredMemberCount }} 人
+          </span>
+        </div>
       </div>
     </main>
 
@@ -173,7 +187,10 @@ import {
   Minus,
   Plus,
   FullScreen,
-  Download
+  Download,
+  Grid,
+  Loading,
+  DataLine
 } from '@element-plus/icons-vue'
 import { genealogyApi } from '@/api/genealogy'
 import type { GenealogyNode } from '@/api/genealogy'
@@ -181,11 +198,9 @@ import type { FilterConditions, GenerationStats } from '@/types/genealogy'
 import { getGenerationColor } from '@/types/genealogy'
 import SearchBar from './components/SearchBar.vue'
 import FilterPanel from './components/FilterPanel.vue'
-import MiniMap from './components/MiniMap.vue'
 import MemberDetailPanel from './components/MemberDetailPanel.vue'
 import GenealogyNodeComponent from './components/GenealogyNode.vue'
 
-// 状态
 const loading = ref(false)
 const treeData = ref<GenealogyNode | null>(null)
 const selectedMemberId = ref<number | null>(null)
@@ -194,18 +209,23 @@ const isSidebarCollapsed = ref(false)
 const isDetailPanelOpen = ref(false)
 const allExpanded = ref(true)
 
-// 缩放相关
 const zoom = ref(1)
 const minZoom = 0.3
 const maxZoom = 2.0
 
-// 画布拖拽相关
+const canvasRef = ref<HTMLElement | null>(null)
+const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null)
+const filterPanelRef = ref<InstanceType<typeof FilterPanel> | null>(null)
+
+const highlightedIds = ref<Set<number>>(new Set())
+const filteredIds = ref<Set<number>>(new Set())
+const collapsedIds = ref<Set<number>>(new Set())
+
 const isDragging = ref(false)
 const dragStart = reactive({ x: 0, y: 0 })
-const panOffset = reactive({ x: 0, y: 0 })
-const canvasRef = ref<HTMLElement | null>(null)
+const canvasPosition = reactive({ x: 0, y: 0 })
 
-// 筛选相关
+const activeGeneration = ref<number | null>(null)
 const filterConditions = ref<FilterConditions>({
   generations: [],
   gender: '',
@@ -213,35 +233,32 @@ const filterConditions = ref<FilterConditions>({
   birthYearFrom: null,
   birthYearTo: null
 })
-const highlightedIds = ref<number[]>([])
-const filteredIds = ref<number[]>([])
-const collapsedIds = ref<number[]>([])
-const activeGeneration = ref<number | null>(null)
 
-// 搜索相关
-const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null)
+const totalMemberCount = computed(() => {
+  if (!treeData.value) return 0
+  let count = 0
+  const traverse = (node: GenealogyNode) => {
+    count++
+    node.children?.forEach(traverse)
+  }
+  traverse(treeData.value)
+  return count
+})
 
-// Refs
-const filterPanelRef = ref<InstanceType<typeof FilterPanel> | null>(null)
+const filteredMemberCount = computed(() => {
+  if (filteredIds.value.size === 0) return totalMemberCount.value
+  return filteredIds.value.size
+})
 
-// 计算属性
-const canvasStyle = computed(() => ({
-  transform: `scale(${zoom.value}) translate(${panOffset.x}px, ${panOffset.y}px)`,
-  transformOrigin: 'center center'
-}))
-
-// 辈分统计
 const generationStats = computed<GenerationStats[]>(() => {
   if (!treeData.value) return []
-
-  const stats: Map<number, number> = new Map()
+  const stats = new Map<number, number>()
 
   const traverse = (node: GenealogyNode) => {
     const gen = node.generation || 1
     stats.set(gen, (stats.get(gen) || 0) + 1)
     node.children?.forEach(traverse)
   }
-
   traverse(treeData.value)
 
   return Array.from(stats.entries())
@@ -253,33 +270,15 @@ const generationStats = computed<GenerationStats[]>(() => {
     .sort((a, b) => a.generation - b.generation)
 })
 
-// 总成员数
-const totalMemberCount = computed(() => {
-  if (!treeData.value) return 0
+const canvasContentStyle = computed(() => ({
+  transform: `translate(${canvasPosition.x}px, ${canvasPosition.y}px) scale(${zoom.value})`
+}))
 
-  let count = 0
-  const traverse = (node: GenealogyNode) => {
-    count++
-    node.children?.forEach(traverse)
-  }
-  traverse(treeData.value)
-  return count
-})
-
-// 筛选后的成员数
-const filteredMemberCount = computed(() => {
-  if (filteredIds.value.length === 0) return totalMemberCount.value
-  return filteredIds.value.length
-})
-
-// 加载族谱数据
 const loadTreeData = async () => {
   loading.value = true
   try {
     const res = await genealogyApi.getTree()
     treeData.value = res.data
-    // 默认展开全部
-    collapsedIds.value = []
   } catch (error) {
     console.error('加载族谱数据失败', error)
     ElMessage.error('加载族谱数据失败')
@@ -288,227 +287,91 @@ const loadTreeData = async () => {
   }
 }
 
-// 节点点击
 const handleNodeClick = (node: GenealogyNode) => {
   selectedMemberId.value = node.memberId
   selectedMember.value = node
   isDetailPanelOpen.value = true
-
-  // 如果节点被折叠，展开它
-  if (collapsedIds.value.includes(node.memberId)) {
-    toggleCollapse(node.memberId)
-  }
 }
 
-// 节点双击
 const handleNodeDoubleClick = (node: GenealogyNode) => {
-  if (node.children && node.children.length > 0) {
-    toggleCollapse(node.memberId)
+  if (collapsedIds.value.has(node.memberId)) {
+    collapsedIds.value.delete(node.memberId)
   } else {
-    // 居中到该节点
-    centerToNode(node)
+    collapsedIds.value.add(node.memberId)
   }
 }
 
-// 切换折叠状态
-const toggleCollapse = (memberId: number) => {
-  const index = collapsedIds.value.indexOf(memberId)
-  if (index === -1) {
-    collapsedIds.value.push(memberId)
-  } else {
-    collapsedIds.value.splice(index, 1)
-  }
-}
-
-// 居中到节点
-const centerToNode = (node: GenealogyNode) => {
-  // 简单实现，实际需要计算节点位置
-  ElMessage.info(`定位到: ${node.name}`)
-}
-
-// 搜索处理
 const handleSearch = (keyword: string) => {
-  if (!keyword) {
-    highlightedIds.value = []
+  if (!keyword.trim()) {
+    highlightedIds.value.clear()
     return
   }
-
-  // 搜索并高亮匹配节点
-  const matchedIds: number[] = []
-  const searchInTree = (node: GenealogyNode) => {
-    if (node.name.includes(keyword)) {
-      matchedIds.push(node.memberId)
-    }
-    node.children?.forEach(searchInTree)
-  }
-
-  if (treeData.value) {
-    searchInTree(treeData.value)
-  }
-
-  highlightedIds.value = matchedIds
-
-  if (matchedIds.length === 0) {
-    ElMessage.warning('未找到匹配成员')
-  } else {
-    ElMessage.success(`找到 ${matchedIds.length} 个匹配成员`)
-  }
-}
-
-// 搜索选择
-const handleSearchSelect = (member: any) => {
-  selectedMemberId.value = member.memberId
-  isDetailPanelOpen.value = true
-
-  // 高亮搜索结果
-  highlightedIds.value = [member.memberId]
-
-  // 折叠路径上的节点需要展开
-  expandPathToNode(member.memberId)
-}
-
-// 展开到节点的路径
-const expandPathToNode = (memberId: number) => {
-  const path: number[] = []
-
-  const findPath = (node: GenealogyNode, targetId: number): boolean => {
-    if (node.memberId === targetId) {
-      return true
-    }
-
-    if (node.children) {
-      for (const child of node.children) {
-        if (findPath(child, targetId)) {
-          path.push(node.memberId)
-          return true
-        }
-      }
-    }
-
-    return false
-  }
-
-  if (treeData.value) {
-    findPath(treeData.value, memberId)
-    // 移除当前节点，只展开祖先节点
-    collapsedIds.value = collapsedIds.value.filter(id => !path.includes(id))
-  }
-}
-
-// 筛选变化
-const handleFilterChange = (filters: FilterConditions) => {
-  filterConditions.value = filters
-
-  if (!treeData.value) {
-    filteredIds.value = []
-    return
-  }
-
-  // 应用筛选
-  const matchedIds: number[] = []
-
-  const filterNode = (node: GenealogyNode): boolean => {
-    // 辈分筛选
-    if (filters.generations.length > 0) {
-      const gen = node.generation || 1
-      if (!filters.generations.includes(gen)) {
-        return false
-      }
-    }
-
-    // 性别筛选
-    if (filters.gender && node.gender !== filters.gender) {
-      return false
-    }
-
-    // 状态筛选
-    if (filters.status && node.status !== filters.status) {
-      return false
-    }
-
-    // 年代筛选（简化处理）
-    if (filters.birthYearFrom || filters.birthYearTo) {
-      if (node.birthDate) {
-        const year = parseInt(node.birthDate.split('-')[0])
-        if (filters.birthYearFrom && year < filters.birthYearFrom) {
-          return false
-        }
-        if (filters.birthYearTo && year > filters.birthYearTo) {
-          return false
-        }
-      }
-    }
-
-    return true
-  }
-
+  const ids = new Set<number>()
   const traverse = (node: GenealogyNode) => {
-    if (filterNode(node)) {
-      matchedIds.push(node.memberId)
+    if (node.name.includes(keyword)) {
+      ids.add(node.memberId)
     }
     node.children?.forEach(traverse)
   }
+  if (treeData.value) {
+    traverse(treeData.value)
+  }
+  highlightedIds.value = ids
+}
 
+const handleSearchSelect = (member: any) => {
+  selectedMemberId.value = member.memberId
+  selectedMember.value = member
+  isDetailPanelOpen.value = true
+}
+
+const handleFilterChange = (filters: FilterConditions) => {
+  filterConditions.value = filters
+  if (!treeData.value) {
+    filteredIds.value.clear()
+    return
+  }
+
+  const ids = new Set<number>()
+  const traverse = (node: GenealogyNode) => {
+    let match = true
+    if (filters.generations.length > 0 && !filters.generations.includes(node.generation)) {
+      match = false
+    }
+    if (filters.gender && node.gender !== filters.gender) {
+      match = false
+    }
+    if (filters.status && node.status !== filters.status) {
+      match = false
+    }
+    if (match) {
+      ids.add(node.memberId)
+    }
+    node.children?.forEach(traverse)
+  }
   traverse(treeData.value)
-  filteredIds.value = matchedIds
-
-  if (matchedIds.length === 0 && hasActiveFilters()) {
-    ElMessage.warning('没有符合条件的成员')
-  }
+  filteredIds.value = ids
 }
 
-// 是否有激活的筛选
-const hasActiveFilters = () => {
-  const f = filterConditions.value
-  return (
-    f.generations.length > 0 ||
-    f.gender !== null ||
-    f.status !== null ||
-    f.birthYearFrom !== null ||
-    f.birthYearTo !== null
-  )
-}
-
-// 辈分导航点击
 const handleGenerationClick = (generation: number) => {
-  activeGeneration.value = generation
-  filterConditions.value = {
-    ...filterConditions.value,
-    generations: [generation]
-  }
-  handleFilterChange(filterConditions.value)
-}
-
-// 小地图跳转
-const handleMapJump = (position: { x: number; y: number }) => {
-  // 移动画布到位置
-  panOffset.x = -position.x / 100
-  panOffset.y = -position.y / 100
-  ElMessage.success('已跳转到指定位置')
-}
-
-// 展开/折叠全部
-const handleExpandAll = () => {
-  allExpanded.value = !allExpanded.value
-
-  if (allExpanded.value) {
-    collapsedIds.value = []
-  } else {
-    // 折叠所有有子节点的节点
-    collapsedIds.value = []
-    const collectCollapsed = (node: GenealogyNode) => {
-      if (node.children && node.children.length > 0) {
-        collapsedIds.value.push(node.memberId)
-        node.children.forEach(collectCollapsed)
+  activeGeneration.value = activeGeneration.value === generation ? null : generation
+  if (activeGeneration.value !== null) {
+    const ids = new Set<number>()
+    const traverse = (node: GenealogyNode) => {
+      if (node.generation === generation) {
+        ids.add(node.memberId)
       }
+      node.children?.forEach(traverse)
     }
     if (treeData.value) {
-      collectCollapsed(treeData.value)
+      traverse(treeData.value)
     }
+    filteredIds.value = ids
+  } else {
+    filteredIds.value.clear()
   }
 }
 
-// 缩放控制
 const handleZoomIn = () => {
   zoom.value = Math.min(zoom.value + 0.1, maxZoom)
 }
@@ -519,11 +382,27 @@ const handleZoomOut = () => {
 
 const handleZoomReset = () => {
   zoom.value = 1
-  panOffset.x = 0
-  panOffset.y = 0
+  canvasPosition.x = 0
+  canvasPosition.y = 0
 }
 
-// 全屏
+const handleExpandAll = () => {
+  allExpanded.value = !allExpanded.value
+  if (allExpanded.value) {
+    collapsedIds.value.clear()
+  } else {
+    const collectIds = (node: GenealogyNode) => {
+      if (node.children && node.children.length > 0) {
+        collapsedIds.value.add(node.memberId)
+        node.children.forEach(collectIds)
+      }
+    }
+    if (treeData.value) {
+      collectIds(treeData.value)
+    }
+  }
+}
+
 const handleFullScreen = () => {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen()
@@ -532,25 +411,21 @@ const handleFullScreen = () => {
   }
 }
 
-// 导出
 const handleExport = () => {
   ElMessage.info('导出功能开发中')
 }
 
-// 画布拖拽
 const handleCanvasMouseDown = (e: MouseEvent) => {
-  if (e.button === 0) {
-    isDragging.value = true
-    dragStart.x = e.clientX - panOffset.x
-    dragStart.y = e.clientY - panOffset.y
-  }
+  if (e.button !== 0) return
+  isDragging.value = true
+  dragStart.x = e.clientX - canvasPosition.x
+  dragStart.y = e.clientY - canvasPosition.y
 }
 
 const handleCanvasMouseMove = (e: MouseEvent) => {
-  if (isDragging.value) {
-    panOffset.x = e.clientX - dragStart.x
-    panOffset.y = e.clientY - dragStart.y
-  }
+  if (!isDragging.value) return
+  canvasPosition.x = e.clientX - dragStart.x
+  canvasPosition.y = e.clientY - dragStart.y
 }
 
 const handleCanvasMouseUp = () => {
@@ -559,60 +434,30 @@ const handleCanvasMouseUp = () => {
 
 const handleCanvasWheel = (e: WheelEvent) => {
   e.preventDefault()
-  if (e.deltaY < 0) {
-    handleZoomIn()
-  } else {
-    handleZoomOut()
-  }
+  const delta = e.deltaY > 0 ? -0.1 : 0.1
+  zoom.value = Math.max(minZoom, Math.min(maxZoom, zoom.value + delta))
 }
 
 const handleCanvasDoubleClick = () => {
   handleZoomReset()
 }
 
-// 详情面板关闭
-const handleDetailPanelClose = (visible: boolean) => {
-  isDetailPanelOpen.value = visible
-  if (!visible) {
-    selectedMemberId.value = null
-    selectedMember.value = null
-  }
+const handleDetailPanelClose = () => {
+  isDetailPanelOpen.value = false
 }
 
-// 跳转到成员
 const handleJumpToMember = (memberId: number) => {
   selectedMemberId.value = memberId
-  isDetailPanelOpen.value = true
-
-  // 找到节点并选中
-  const findNode = (node: GenealogyNode): GenealogyNode | null => {
-    if (node.memberId === memberId) {
-      return node
-    }
-    for (const child of node.children || []) {
-      const found = findNode(child)
-      if (found) return found
-    }
-    return null
-  }
-
-  if (treeData.value) {
-    const node = findNode(treeData.value)
-    if (node) {
-      selectedMember.value = node
-      expandPathToNode(memberId)
-    }
-  }
 }
 
-// 切换侧边栏
 const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value
 }
 
-// 监听窗口大小变化
 const handleResize = () => {
-  // 响应式处理
+  if (canvasRef.value) {
+    // Handle resize if needed
+  }
 }
 
 onMounted(() => {
@@ -626,19 +471,20 @@ onMounted(() => {
   display: flex;
   height: calc(100vh - 64px);
   overflow: hidden;
-  background: #F5F7FA;
+  background: #ffffff;
 }
 
 /* 左侧边栏 */
 .left-sidebar {
   position: relative;
-  width: 280px;
-  background: #fff;
-  border-right: 1px solid #E4E7ED;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.98);
+  border-right: 1px solid rgba(102, 126, 234, 0.1);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  box-shadow: 4px 0 24px rgba(44, 30, 116, 0.06);
 }
 
 .left-sidebar.is-collapsed {
@@ -646,41 +492,62 @@ onMounted(() => {
   border-right: none;
 }
 
+.sidebar-header {
+  padding: 24px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0 0 24px 24px;
+  margin: -16px -16px 16px -16px;
+}
+
+.sidebar-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.sidebar-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 0 16px 16px;
 }
 
 .sidebar-section {
   margin-bottom: 20px;
 }
 
-.sidebar-section:last-child {
-  margin-bottom: 0;
-}
-
 .sidebar-toggle {
   position: absolute;
-  right: -12px;
+  right: -14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 48px;
-  background: #fff;
-  border: 1px solid #E4E7ED;
-  border-radius: 0 4px 4px 0;
+  width: 28px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 0 14px 14px 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #909399;
+  color: #667eea;
+  box-shadow: rgba(44, 30, 116, 0.08) 4px 0 12px;
+  transition: all 0.2s ease;
   z-index: 10;
 }
 
 .sidebar-toggle:hover {
-  color: #409EFF;
-  border-color: #409EFF;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border-color: transparent;
 }
 
 /* 搜索区域 */
@@ -699,12 +566,24 @@ onMounted(() => {
 }
 
 .section-title {
-  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
   font-weight: 600;
-  color: #303133;
+  color: #45515e;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #E4E7ED;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.section-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: #8e8e93;
+  background: rgba(102, 126, 234, 0.08);
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
 .generation-list {
@@ -713,45 +592,71 @@ onMounted(() => {
   gap: 8px;
 }
 
-.generation-item {
+.generation-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 4px;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #f2f3f5;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.generation-item:hover {
-  background: #F5F7FA;
+.generation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: rgba(44, 30, 116, 0.12) 0 8px 24px;
+  border-color: rgba(102, 126, 234, 0.3);
 }
 
-.generation-item.is-active {
-  background: #ECF5FF;
+.generation-card.is-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  box-shadow: rgba(44, 30, 116, 0.2) 0 8px 24px;
+}
+
+.generation-card.is-active .gen-label,
+.generation-card.is-active .gen-count {
+  color: #ffffff;
 }
 
 .gen-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 6px;
   flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .gen-label {
   flex: 1;
+  font-family: 'DM Sans', sans-serif;
   font-size: 13px;
-  color: #303133;
+  font-weight: 500;
+  color: #18181b;
 }
 
 .gen-count {
-  font-size: 12px;
-  color: #909399;
+  font-size: 11px;
+  color: #8e8e93;
+  background: #f5f5f5;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+.generation-card.is-active .gen-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 /* 小地图 */
 .mini-map-section {
   margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 /* 主画布 */
@@ -761,30 +666,111 @@ onMounted(() => {
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background: #ffffff;
 }
 
-.canvas-container {
+/* 主画布 - 固定视口 */
+.main-canvas {
   flex: 1;
-  overflow: auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 40px;
-  transition: transform 0.1s ease-out;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
   cursor: grab;
 }
 
-.canvas-container:active {
+.main-canvas:active {
   cursor: grabbing;
 }
 
-.canvas-loading,
-.canvas-empty {
+/* 族谱内容层 - 可缩放拖动 */
+.canvas-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  transition: transform 0.05s linear;
+  will-change: transform;
+}
+
+.canvas-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 24px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.canvas-loading p {
+  font-size: 14px;
+  color: #8e8e93;
+  margin: 0;
+}
+
+.canvas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px;
+}
+
+.empty-illustration {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-radius: 32px;
+  color: #667eea;
+  margin-bottom: 24px;
+}
+
+.canvas-empty h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #18181b;
+  margin: 0 0 8px 0;
+}
+
+.canvas-empty p {
+  font-size: 14px;
+  color: #8e8e93;
+  margin: 0 0 24px 0;
+}
+
+.empty-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.empty-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
 }
 
 .tree-wrapper {
@@ -802,11 +788,15 @@ onMounted(() => {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 8px 16px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  gap: 20px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    rgba(44, 30, 116, 0.12) 0 8px 32px,
+    inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .zoom-controls {
@@ -815,13 +805,71 @@ onMounted(() => {
   gap: 12px;
 }
 
-.zoom-value {
-  min-width: 60px;
-  text-align: center;
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+}
+
+.btn-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.zoom-track {
+  width: 100px;
 }
 
 .zoom-slider {
-  width: 120px;
+  width: 100%;
+}
+
+.zoom-slider :deep(.el-slider__runway) {
+  background: #e5e7eb;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.zoom-slider :deep(.el-slider__bar) {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  height: 4px;
+  border-radius: 2px;
+}
+
+.zoom-slider :deep(.el-slider__button) {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.zoom-value {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #45515e;
+  min-width: 48px;
+  text-align: center;
+}
+
+.control-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(102, 126, 234, 0.15);
 }
 
 .view-controls {
@@ -830,46 +878,90 @@ onMounted(() => {
   gap: 8px;
 }
 
+.btn-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border: none;
+  border-radius: 9999px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pill:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
 /* 状态栏 */
 .canvas-status {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 44px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: space-between;
   padding: 0 20px;
-  background: #fff;
-  border-top: 1px solid #E4E7ED;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  color: #909399;
+  color: #45515e;
+}
+
+.status-left,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d1d5db;
+}
+
+.status-dot.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* 右侧面板 */
 .right-panel {
   width: 0;
-  background: #fff;
-  border-left: 1px solid #E4E7ED;
+  background: #ffffff;
+  border-left: 1px solid rgba(102, 126, 234, 0.1);
   overflow: hidden;
-  transition: width 0.3s ease-out;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -4px 0 24px rgba(44, 30, 116, 0.06);
 }
 
 .right-panel.is-open {
-  width: 320px;
+  width: 360px;
 }
 
 /* 响应式适配 */
 @media (max-width: 1199px) {
   .left-sidebar {
-    width: 240px;
+    width: 260px;
   }
 
   .generation-nav {
@@ -884,13 +976,13 @@ onMounted(() => {
     top: 64px;
     bottom: 0;
     z-index: 100;
-    width: 280px;
+    width: 300px;
     transform: translateX(-100%);
   }
 
   .left-sidebar.is-collapsed {
     transform: translateX(-100%);
-    width: 280px;
+    width: 300px;
   }
 
   .right-panel {
@@ -910,9 +1002,15 @@ onMounted(() => {
     bottom: 60px;
     flex-wrap: wrap;
     justify-content: center;
+    padding: 8px 16px;
+    gap: 12px;
   }
 
-  .zoom-slider {
+  .zoom-track {
+    display: none;
+  }
+
+  .control-divider {
     display: none;
   }
 }
