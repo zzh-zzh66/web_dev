@@ -15,4 +15,5 @@ public class MemberSimpleDTO {
     private String name;
     private String gender;
     private Integer generation;
+    private String status;
 }

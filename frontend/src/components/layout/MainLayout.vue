@@ -57,7 +57,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessageBox } from 'element-plus'
-import { HomeFilled, User, Tree } from '@element-plus/icons-vue'
+import { HomeFilled, User, Grid } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

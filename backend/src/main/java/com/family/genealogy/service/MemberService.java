@@ -155,6 +155,7 @@ public class MemberService {
                         .name(m.getName())
                         .gender(m.getGender())
                         .generation(m.getGeneration())
+                        .status(m.getStatus())
                         .build())
                 .toList());
         pageDTO.setTotal(result.getTotal());

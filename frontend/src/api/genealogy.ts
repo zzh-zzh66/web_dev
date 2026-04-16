@@ -6,6 +6,15 @@ export interface GenealogyNode {
   name: string
   gender: 'MALE' | 'FEMALE'
   generation: number
+  status: 'ALIVE' | 'DECEASED'
+  birthDate?: string
+  deathDate?: string
+  portraitUrl?: string
+  spouseName?: string
+  fatherId?: number
+  fatherName?: string
+  motherId?: number
+  motherName?: string
   children: GenealogyNode[]
 }
 
