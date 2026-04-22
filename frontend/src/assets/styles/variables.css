@@ -1,0 +1,132 @@
+/**
+ * V2.0 Design Tokens - CSS Custom Properties
+ * 个人主页功能模块设计令牌
+ * 基于UI设计文档规范，融入中国传统家族文化元素
+ */
+
+:root {
+  /* ===== 中国传统辅助色 ===== */
+  --chinese-red: #C41E3A;
+  --chinese-red-dark: #9B1B30;
+  --chinese-red-light: #E85D75;
+  --chinese-red-bg: #FEF2F2;
+  
+  --imperial-gold: #D4A017;
+  --imperial-gold-light: #F0D48A;
+  --imperial-gold-bg: #FEF9E7;
+  
+  --ink-color: #4A4A4A;
+  --ink-color-light: #6B6B6B;
+  --ink-color-muted: #999999;
+  
+  --rice-paper: #F9F6F0;
+  --rice-cream: #FDF8F0;
+
+  /* ===== 内容分类色彩 ===== */
+  --color-category-log: #409EFF;
+  --color-category-photo: #67C23A;
+  --color-category-video: #E6A23C;
+  --color-category-story: #C41E3A;
+  --color-category-mood: #909399;
+  --color-category-collection: #D4A017;
+
+  /* ===== 间距系统 ===== */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+  --space-xxxl: 48px;
+
+  /* ===== 圆角系统 ===== */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-base: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 50%;
+
+  /* ===== 阴影系统 ===== */
+  --shadow-none: none;
+  --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-dark: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.18);
+
+  /* ===== 字体系统 ===== */
+  --font-family-title: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-family-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-family-mono: "SF Mono", "Monaco", "Menlo", "Courier New", monospace;
+
+  /* ===== 字号系统 ===== */
+  --font-h1: 28px;
+  --font-h2: 22px;
+  --font-h3: 18px;
+  --font-h4: 16px;
+  --font-body-lg: 15px;
+  --font-body: 14px;
+  --font-body-sm: 13px;
+  --font-caption: 12px;
+
+  /* ===== 行高 ===== */
+  --line-height-title: 1.4;
+  --line-height-body: 1.6;
+  --line-height-body-lg: 1.8;
+  --line-height-compact: 1.0;
+
+  /* ===== 动画时长 ===== */
+  --duration-fast: 100ms;
+  --duration-base: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --easing-in: ease-in;
+  --easing-out: ease-out;
+  --easing-in-out: ease-in-out;
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  /* ===== 断点 ===== */
+  --breakpoint-xs: 576px;
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1200px;
+  --breakpoint-lg: 1600px;
+  --breakpoint-xl: 1920px;
+
+  /* ===== 布局尺寸 ===== */
+  --sidebar-left-width: 280px;
+  --sidebar-right-width: 340px;
+  --content-min-width: 600px;
+  --container-max-width: 1440px;
+  --header-height: 64px;
+  --cover-height: 280px;
+  --cover-height-md: 220px;
+  --cover-height-sm: 180px;
+  --avatar-size: 120px;
+  --avatar-size-md: 100px;
+  --avatar-size-sm: 80px;
+}
+
+/* ===== 深色模式 ===== */
+[data-theme="dark"] {
+  --chinese-red: #E85D75;
+  --imperial-gold: #E8C84A;
+  --ink-color: #E5E5E5;
+  --ink-color-light: #A0A0A0;
+  --ink-color-muted: #808080;
+  --rice-paper: #1A1A1A;
+  --rice-cream: #2A2A2A;
+}
+
+/* ===== 大字体模式 ===== */
+[data-font-size="large"] {
+  --font-h1: 32px;
+  --font-h2: 26px;
+  --font-h3: 22px;
+  --font-h4: 20px;
+  --font-body-lg: 18px;
+  --font-body: 16px;
+  --font-body-sm: 15px;
+  --font-caption: 14px;
+  --line-height-body: 1.8;
+}

@@ -23,5 +23,6 @@ public class LoginResponse {
         private String phone;
         private String name;
         private String role;
+        private String avatarUrl;
     }
 }

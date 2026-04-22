@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.family.genealogy.mapper.TimelinePostMapper">
+
+    <!-- 分页查询动态列表(含用户信息、媒体列表、点赞状态) -->
+    <select id="selectPostListWithDetails" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.user_id,
+            p.post_type,
+            p.category_id,
+            p.title,
+            p.content,
+            p.visibility,
+            p.like_count,
+            p.comment_count,
+            p.created_at,
+            p.updated_at,
+            u.name AS user_name,
+            pc.name AS category_name
+        FROM t_timeline_post p
+        LEFT JOIN t_user u ON p.user_id = u.id
+        LEFT JOIN t_post_category pc ON p.category_id = pc.id
+        WHERE p.deleted = 0
+          AND p.status = 'PUBLISHED'
+          AND p.user_id = #{userId}
+        <if test="categoryId != null">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="year != null">
+            AND YEAR(p.created_at) = #{year}
+        </if>
+        <if test="month != null">
+            AND MONTH(p.created_at) = #{month}
+        </if>
+        ORDER BY p.created_at DESC
+    </select>
+
+    <!-- 查询动态详情(含用户信息) -->
+    <select id="selectPostDetail" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.user_id,
+            p.post_type,
+            p.category_id,
+            p.title,
+            p.content,
+            p.visibility,
+            p.like_count,
+            p.comment_count,
+            p.created_at,
+            p.updated_at,
+            u.name AS user_name
+        FROM t_timeline_post p
+        LEFT JOIN t_user u ON p.user_id = u.id
+        WHERE p.id = #{postId}
+          AND p.deleted = 0
+    </select>
+
+</mapper>

@@ -1,3 +1,9 @@
+# ============================================================
+# 家族族谱系统 - .gitignore
+# 最后更新: 2026-04-17
+# ============================================================
+
+# ==================== Java / Maven ====================
 # Maven
 target/
 pom.xml.tag
@@ -16,56 +22,175 @@ gradlew
 gradlew.bat
 build/
 
-# IDE
+# 编译产物
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.exe
+*.o
+*.so
+
+# ==================== Node / Frontend ====================
+# 依赖目录
+node_modules/
+bower_components/
+
+# 构建产物
+dist/
+dist-ssr/
+*.local
+
+# Vite
+.vite/
+
+# npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ==================== IDE ====================
+# IntelliJ IDEA
 .idea/
-*.iml
 *.iws
+*.iml
 *.ipr
+out/
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Eclipse
 .project
 .classpath
 .settings/
-.vscode/
+bin/
+tmp/
+
+# 其他编辑器
 *.swp
 *.swo
 *~
-
-# Eclipse
-bin/
-tmp/
 *.bak
-*.class
-*.log
+*.sublime-*
 
-# OS
+# ==================== 操作系统 ====================
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
 desktop.ini
 
-# Logs
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ==================== 日志文件 ====================
 *.log
 logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Package files
-*.jar
-*.war
-*.nar
-*.ear
+# ==================== 环境变量与敏感配置 ====================
+# 环境文件
+.env
+.env.local
+.env.*.local
+*.local
+
+# 应用配置 (敏感信息)
+application-local.yml
+application-dev.yml
+application-prod.yml
+*.secret.yml
+*.secret.properties
+
+# 密钥文件
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+
+# 数据库凭据
+*.credentials
+*.creds
+
+# ==================== 上传的文件 ====================
+# 用户上传的文件 (生产环境应使用独立存储)
+uploads/
+files/
+media/
+static/uploads/
+backend/uploads/
+
+# 图片缓存
+*.thumbnail.*
+*.resize.*
+
+# ==================== 临时文件 ====================
+# 系统临时文件
+*.tmp
+*.temp
+.temp/
+.tmp/
+
+# 缓存
+.cache/
+*.cache
+.parcel-cache/
+.turbo/
+
+# ==================== 测试覆盖率 ====================
+coverage/
+*.lcov
+.nyc_output/
+
+# ==================== 其他 ====================
+# 包文件
 *.zip
 *.tar.gz
 *.rar
+*.7z
 
-# Environment
-.env
-.env.local
-*.local
+# 性能分析文件
+*.prof
+*.cpuprofile
+*.heapprofile
 
-# Application
-application-local.yml
-application-dev.yml
-*.local.properties
+# 依赖锁定 (根据项目需要选择性忽略)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
 
-# Node (if frontend)
-node_modules/
-dist/
-.npm/
-.yarn/
+# 数据库备份文件
+*.sql.bak
+*_backup.sql
+
+# 备份目录
+backup/
+backups/

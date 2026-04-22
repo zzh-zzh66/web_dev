@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.family.genealogy.mapper.NotificationMapper">
+
+    <!-- 按类型分组统计未读数 -->
+    <select id="countUnreadByType" resultType="java.util.Map">
+        SELECT
+            type,
+            COUNT(*) AS count
+        FROM t_notification
+        WHERE receiver_id = #{userId}
+          AND is_read = 0
+          AND deleted = 0
+          AND status = 1
+        GROUP BY type
+    </select>
+
+</mapper>

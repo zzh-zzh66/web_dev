@@ -19,6 +19,7 @@ export interface LoginResponse {
     phone: string
     name: string
     role: string
+    avatarUrl?: string
   }
 }
 

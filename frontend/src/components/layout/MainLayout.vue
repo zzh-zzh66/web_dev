@@ -94,7 +94,12 @@ import {
   DataLine,
   ArrowDown,
   SwitchButton,
-  Sunny
+  Sunny,
+  HomeFilled,
+  Grid,
+  UserFilled,
+  Bell,
+  Message
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -103,8 +108,12 @@ const userStore = useUserStore()
 
 const navItems = [
   { path: '/', label: '首页', icon: 'HomeFilled' },
+  { path: '/family', label: '家族动态', icon: 'ChatDotRound' },
   { path: '/members', label: '成员管理', icon: 'User' },
-  { path: '/genealogy', label: '族谱展示', icon: 'Grid' }
+  { path: '/genealogy', label: '族谱展示', icon: 'Grid' },
+  { path: '/profile/' + userStore.userInfo?.userId, label: '个人主页', icon: 'UserFilled' },
+  { path: '/notifications', label: '通知中心', icon: 'Bell' },
+  { path: '/messages', label: '私信', icon: 'Message' }
 ]
 
 const isActive = (path: string) => {
@@ -124,7 +133,7 @@ const handleCommand = async (command: string) => {
     await userStore.logout()
     router.push('/login')
   } else if (command === 'profile') {
-    router.push('/')
+    router.push('/profile/' + userStore.userInfo?.userId)
   }
 }
 </script>

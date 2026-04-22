@@ -30,5 +30,6 @@ export interface UserInfo {
   phone: string
   name: string
   role: string
+  avatarUrl?: string
   familyId?: number
 }

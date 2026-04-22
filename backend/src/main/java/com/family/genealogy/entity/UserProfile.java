@@ -1,14 +1,11 @@
 package com.family.genealogy.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 /**
- * 用户资料扩展实体类
- * 用于存储用户的个人主页扩展资料
+ * 用户主页档案实体
  */
 @Data
 @TableName("t_user_profile")
@@ -17,85 +14,43 @@ public class UserProfile {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 用户ID
-     */
     private Long userId;
 
-    /**
-     * 关联成员ID
-     */
     private Long memberId;
 
-    /**
-     * 主页封面图片URL
-     */
-    private String coverUrl;
-
-    /**
-     * 头像URL
-     */
-    private String avatarUrl;
-
-    /**
-     * 个人简介
-     */
     private String bio;
 
-    /**
-     * 职业
-     */
-    private String occupation;
+    private String backgroundUrl;
 
-    /**
-     * 出生地
-     */
+    private String signature;
+
     private String birthPlace;
 
-    /**
-     * 现居地
-     */
-    private String currentPlace;
+    private String occupation;
 
-    /**
-     * 兴趣爱好(JSON数组)
-     */
-    private String hobbies;
+    private String education;
 
-    /**
-     * 个人成就(JSON数组)
-     */
-    private String achievements;
+    private String hometown;
 
-    /**
-     * 人生座右铭
-     */
-    private String motto;
+    private String lifeEvents;
 
-    /**
-     * 电子邮箱
-     */
-    private String email;
+    private String statsJson;
 
-    /**
-     * 联系电话
-     */
-    private String phone;
+    private Long visitCount;
 
-    /**
-     * 资料可见度: PUBLIC-公开, FAMILY-家族可见, RELATIVES-亲属可见, PRIVATE-仅自己
-     */
-    private String privacySetting;
+    private String theme;
 
-    /**
-     * 创建时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Integer status;
+
+    private Long createdBy;
+
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
-    /**
-     * 更新时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Long updatedBy;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
+
+    private Integer deleted;
 }

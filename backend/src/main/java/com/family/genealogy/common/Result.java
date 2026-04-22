@@ -66,4 +66,17 @@ public class Result<T> {
                 .message(message)
                 .build();
     }
+
+    public static <T> Result<T> error(String code, String message) {
+        int codeNum = 500;
+        try {
+            codeNum = Integer.parseInt(code);
+        } catch (NumberFormatException e) {
+            // 非数字error code, 使用500
+        }
+        return Result.<T>builder()
+                .code(codeNum)
+                .message(message)
+                .build();
+    }
 }

@@ -58,6 +58,7 @@ public class AuthService {
                 .phone(user.getPhone())
                 .name(user.getName())
                 .role(user.getRole())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
 
         return LoginResponse.builder()

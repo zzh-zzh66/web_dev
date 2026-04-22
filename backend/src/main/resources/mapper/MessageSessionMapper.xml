@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.family.genealogy.mapper.MessageSessionMapper">
+
+    <!-- 查询用户会话列表(含最后消息、对方信息) -->
+    <select id="selectUserSessions" resultType="java.util.Map">
+        SELECT
+            s.id AS session_id,
+            s.last_message,
+            s.last_message_time,
+            CASE
+                WHEN s.user_id_1 = #{userId} THEN s.user_id_2
+                ELSE s.user_id_1
+            END AS peer_user_id,
+            CASE
+                WHEN s.user_id_1 = #{userId} THEN s.unread_count_1
+                ELSE s.unread_count_2
+            END AS unread_count,
+            u.name AS peer_user_name
+        FROM t_message_session s
+        LEFT JOIN t_user u ON (
+            CASE
+                WHEN s.user_id_1 = #{userId} THEN s.user_id_2
+                ELSE s.user_id_1
+            END = u.id
+        )
+        WHERE s.user_id_1 = #{userId} OR s.user_id_2 = #{userId}
+        ORDER BY s.last_message_time DESC
+    </select>
+
+    <!-- 根据session_key查询会话 -->
+    <select id="selectBySessionKey" resultType="com.family.genealogy.entity.MessageSession">
+        SELECT *
+        FROM t_message_session
+        WHERE session_key = #{sessionKey}
+    </select>
+
+</mapper>

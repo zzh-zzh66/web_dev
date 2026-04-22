@@ -31,7 +31,7 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data
-    if (res.code !== 200) {
+    if (res.code !== 200 && res.code !== 201) {
       ElMessage.error(res.message || '请求失败')
       if (res.code === 401) {
         localStorage.removeItem('token')
