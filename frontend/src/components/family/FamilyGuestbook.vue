@@ -68,12 +68,11 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ChatDotRound, User, MoreFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
-import { familyApi } from '@/api/family'
-import type { MessageBoard } from '@/types/profile'
+import { familyApi, type FamilyGuestbook } from '@/api/family'
 
 const userStore = useUserStore()
 
-const messages = ref<MessageBoard[]>([])
+const messages = ref<FamilyGuestbook[]>([])
 const loading = ref(false)
 const newMessage = ref('')
 const page = ref(1)

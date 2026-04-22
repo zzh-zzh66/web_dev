@@ -31,12 +31,19 @@
         +{{ images.length - 9 }}
       </div>
     </div>
+    <!-- 图片预览 -->
+    <el-image-viewer
+      v-if="previewVisible"
+      :url-list="previewUrls"
+      :initial-index="previewIndex"
+      @close="closePreview"
+      :hide-on-click-modal="true"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ElImageViewer } from 'element-plus'
+import { computed, ref } from 'vue'
 import type { PostMedia } from '@/types/profile'
 
 interface Props {
@@ -56,22 +63,25 @@ const displayCount = computed(() => {
   return Math.min(props.images.length, 9)
 })
 
+/** 预览相关状态 */
+const previewVisible = ref(false)
+const previewUrls = ref<string[]>([])
+const previewIndex = ref(0)
+
 /** 打开图片预览 */
 function openPreview(index: number) {
-  // 使用Element Plus的图片预览功能
-  const urls = props.images.map(img => img.url)
-  ElImageViewer({
-    urlList: urls,
-    initialIndex: index,
-    hideOnClickModal: true,
-    teleported: true
-  })
+  previewUrls.value = props.images.map(img => img.url)
+  previewIndex.value = index
+  previewVisible.value = true
+}
+
+/** 关闭预览 */
+function closePreview() {
+  previewVisible.value = false
 }
 
 /** 兼容旧版事件 */
 function handleImageClick() {
-  // 通过子元素的 @click.stop 阻止冒泡
-  // 此方法不再被调用
 }
 </script>
 

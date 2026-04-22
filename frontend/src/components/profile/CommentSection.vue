@@ -153,8 +153,6 @@ const commentText = ref('')
 const replyTo = ref<Comment | null>(null)
 const hasMore = ref(false)
 
-const currentUserAvatar = computed(() => userStore.userInfo?.avatarUrl || '')
-
 /** 输入框提示文本 */
 const placeholderText = computed(() => {
   return replyTo.value ? `回复 ${replyTo.value.userName}:` : '写下你的评论...'

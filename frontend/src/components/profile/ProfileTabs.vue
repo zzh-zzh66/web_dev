@@ -47,7 +47,7 @@ interface Emits {
   (e: 'update:modelValue', value: string): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()

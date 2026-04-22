@@ -146,10 +146,6 @@ public class NotificationService {
      */
     public void createNotification(Long receiverId, String type, String targetType,
                                     Long targetId, Long senderId, String content) {
-        log.info("=== createNotification 开始 ===");
-        log.info("receiverId={}, type={}, targetType={}, targetId={}, senderId={}, content={}",
-                receiverId, type, targetType, targetId, senderId, content);
-
         Notification notification = new Notification();
         notification.setReceiverId(receiverId);
         notification.setSenderId(senderId);
@@ -161,45 +157,27 @@ public class NotificationService {
         notification.setStatus(1);
         notificationMapper.insert(notification);
 
-        log.info("通知已保存到数据库, id={}", notification.getId());
-        log.info("创建通知: receiverId={}, type={}, content={}", receiverId, type, content);
-
-        log.info("检查用户是否在线: userId={}, isOnline={}", receiverId, sessionManager.isOnline(receiverId));
         pushNotificationToUser(receiverId, notification);
-        log.info("=== createNotification 结束 ===");
     }
 
     /**
      * 通过WebSocket推送通知给在线用户
      */
     private void pushNotificationToUser(Long userId, Notification notification) {
-        log.info("=== pushNotificationToUser 开始 ===");
-        log.info("userId={}, notificationId={}", userId, notification.getId());
-
         if (sessionManager.isOnline(userId)) {
-            log.info("用户在线，开始推送通知");
             try {
                 NotificationDTO dto = buildNotificationDTO(notification);
-                log.info("DTO构建完成: id={}, fromUserName={}, type={}, content={}",
-                        dto.getId(), dto.getFromUserName(), dto.getType(), dto.getContent());
-
                 Map<String, Object> wsMsg = new HashMap<>();
                 wsMsg.put("type", "NOTIFICATION");
                 wsMsg.put("payload", dto);
                 wsMsg.put("timestamp", System.currentTimeMillis());
 
                 String message = objectMapper.writeValueAsString(wsMsg);
-                log.info("WebSocket消息构建完成: {}", message);
-
                 sessionManager.sendToUser(userId, message);
-                log.info("WebSocket推送通知成功: userId={}, notificationId={}", userId, notification.getId());
             } catch (Exception e) {
                 log.error("WebSocket推送通知失败: userId={}", userId, e);
             }
-        } else {
-            log.warn("用户不在线，跳过WebSocket推送: userId={}", userId);
         }
-        log.info("=== pushNotificationToUser 结束 ===");
     }
 
     /**

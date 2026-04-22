@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import type { Category } from '@/types/profile'
 
 interface Props {

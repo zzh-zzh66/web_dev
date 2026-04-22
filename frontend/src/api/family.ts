@@ -1,5 +1,13 @@
 import request from '../utils/request'
-import type { ApiResponse, PageResult } from '../utils/request'
+import type { ApiResponse } from '../utils/request'
+
+/** 分页结果 */
+export interface PageResult<T> {
+  records: T[]
+  total: number
+  page: number
+  size: number
+}
 
 /** 家族留言板 */
 export interface FamilyGuestbook {

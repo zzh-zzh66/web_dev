@@ -61,14 +61,10 @@ public class FamilyGuestbookService {
 
     @Transactional(rollbackFor = Exception.class)
     public FamilyGuestbookDTO createGuestbook(Long userId, FamilyGuestbookDTO dto) {
-        log.info("=== createGuestbook 被调用 === userId={}, content={}", userId, dto.getContent());
-
         User user = userMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "用户不存在");
         }
-
-        log.info("用户信息: userId={}, familyId={}, name={}", user.getId(), user.getFamilyId(), user.getName());
 
         FamilyGuestbook guestbook = new FamilyGuestbook();
         guestbook.setUserId(userId);
@@ -78,9 +74,7 @@ public class FamilyGuestbookService {
         guestbook.setCreatedBy(userId);
 
         familyGuestbookMapper.insert(guestbook);
-        log.info("家族留言已保存: guestbookId={}", guestbook.getId());
 
-        // 通知所有家族成员（除了留言者自己）
         try {
             notifyFamilyMembers(user.getFamilyId(), userId, user.getName(), guestbook.getId(), dto.getContent());
         } catch (Exception e) {
@@ -94,12 +88,10 @@ public class FamilyGuestbookService {
      * 通知所有家族成员有新留言（包括发布者自己）
      */
     private void notifyFamilyMembers(Long familyId, Long senderId, String senderName, Long guestbookId, String content) {
-        // 查询同一家族的所有用户
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getFamilyId, familyId);
         List<User> familyMembers = userMapper.selectList(wrapper);
 
-        // 通知每个家族成员（包括留言者自己）
         for (User member : familyMembers) {
             String notificationContent = senderName + "在家族留言板留言了";
             notificationService.createNotification(
@@ -111,8 +103,6 @@ public class FamilyGuestbookService {
                 notificationContent
             );
         }
-
-        log.info("家族留言通知已发送给所有 {} 位成员", familyMembers.size());
     }
 
     @Transactional(rollbackFor = Exception.class)

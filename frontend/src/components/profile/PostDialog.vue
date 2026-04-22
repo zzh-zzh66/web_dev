@@ -138,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   ArrowDown, Picture, VideoCamera, User,
@@ -181,7 +181,6 @@ const videoInputRef = ref<HTMLInputElement | null>(null)
 
 const categories = computed(() => profileStore.categories)
 const userName = computed(() => userStore.userInfo?.name || '我')
-const userAvatar = computed(() => userStore.userInfo?.avatar || userStore.userInfo?.avatarUrl || '/default-avatar.png')
 
 /** 内容长度 */
 const contentLength = computed(() => contentText.value.length)
@@ -274,8 +273,7 @@ async function handleVideoUpload(event: Event) {
 
   try {
     ElMessage.info('视频上传中...')
-    const res = await fileApi.uploadVideo(file)
-    // 视频上传成功后可以保存视频信息
+    await fileApi.uploadVideo(file)
     postType.value = 'VIDEO'
     ElMessage.success('视频上传成功')
   } catch (error) {

@@ -113,7 +113,6 @@ const submitting = ref(false)
 const hasMore = ref(false)
 const page = ref(1)
 
-const currentUserAvatar = computed(() => userStore.userInfo?.avatarUrl || '')
 const isOwner = computed(() => props.userId === userStore.userInfo?.userId)
 
 /** 是否可以删除 */

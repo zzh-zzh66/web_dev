@@ -186,10 +186,7 @@ function triggerAvatarUpload() {
 
 /** 获取头像URL */
 function getAvatarUrl(): string {
-  // 优先使用userStore中的头像，兼容可能的字段名
-  const avatar = userStore.userInfo?.avatarUrl || userStore.userInfo?.avatar || ''
-  console.log('头像URL:', avatar, 'userInfo:', userStore.userInfo)
-  return avatar
+  return userStore.userInfo?.avatarUrl || ''
 }
 
 /** 触发封面上传 */

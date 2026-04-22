@@ -17,7 +17,7 @@
           class="nav-item"
           :class="{ active: isActive(item.path) }"
         >
-          <el-icon :size="18"><component :is="item.icon" /></el-icon>
+          <el-icon :size="18"><component :is="getIcon(item.icon)" /></el-icon>
           <span>{{ item.label }}</span>
         </router-link>
       </nav>
@@ -94,17 +94,27 @@ import {
   DataLine,
   ArrowDown,
   SwitchButton,
-  Sunny,
   HomeFilled,
   Grid,
   UserFilled,
   Bell,
-  Message
+  Message,
+  ChatDotRound
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+
+const iconMap: Record<string, typeof HomeFilled> = {
+  HomeFilled,
+  Grid,
+  UserFilled,
+  Bell,
+  Message,
+  ChatDotRound,
+  User
+}
 
 const navItems = [
   { path: '/', label: '首页', icon: 'HomeFilled' },
@@ -115,6 +125,8 @@ const navItems = [
   { path: '/notifications', label: '通知中心', icon: 'Bell' },
   { path: '/messages', label: '私信', icon: 'Message' }
 ]
+
+const getIcon = (iconName: string) => iconMap[iconName] || ChatDotRound
 
 const isActive = (path: string) => {
   if (path === '/') {
